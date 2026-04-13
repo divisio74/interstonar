@@ -4,7 +4,7 @@ import numpy as np
 
 G = 6.67430e-11
 
-def calcul(p1, p2, m1, m2):
+def Calcul(p1, p2, m1, m2):
     rx = p2[0] - p1[0]
     ry = p2[1] - p1[1]
     rz = p2[2] - p1[2]
@@ -19,9 +19,26 @@ def calcul(p1, p2, m1, m2):
     fz = f * z
     return fx, fy, fz
 
+def CalculForAll(a, bodies):
+    fx, fy, fz = 0.0, 0.0, 0.0
+    for b in bodies:
+        if b is a:
+            continue
+        tfx, tfy, tfz += Calcul(a["pos"], b ["pos"], a["mass"], b["mass"])
+        fx += tfx
+        fy += tfy
+        fz += tfz
+        pass
+    return fx, fy, fz
+
+
 if __name__ == "__main__":
-    p2 = np.array([0, 0, 6_371_000], dtype=float)
-    p1 = np.array([0, 0, 0],         dtype=float)
-    print(calcul(p1, p2, 70, 5.972e24))
+    from parser import load_global
+    bodies = load_global("global_scene_example.toml")
+
+    for body in bodies:
+        f = CalculForAll(body, bodies)
+        print(f"Force totale sur {body['name']:8s} = {f}")
+
 
 
