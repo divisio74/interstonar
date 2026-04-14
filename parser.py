@@ -67,11 +67,11 @@ def load_global(path):
 
 if __name__ == "__main__":
     print("local :")
-    for s in load_local("local_scene_example.toml"):
+    for s in load_local("testfile/local_scene_example.toml"):
         print(s)
 
     print("\nglobal :")
-    for b in load_global("global_scene_example.toml"):
+    for b in load_global("testfile/global_scene_example.toml"):
         print(b)
 
 
