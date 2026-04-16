@@ -2,7 +2,7 @@ import os
 from math import sqrt
 import numpy as np
 
-G = 6.67430e-11
+G = 6.674e-11
 rock_mass = 1000
 max_try = 1000
 
@@ -47,29 +47,141 @@ def euler_calcul(bodies, dt):
         vitesse_x = c["vel"][0]
         vitesse_y = c["vel"][1]
         vitesse_z = c["vel"][2]
-        new_vitesse_x = vitesse_x + (accel_x * dt)
-        new_vitesse_y = vitesse_y + (accel_y * dt)
-        new_vitesse_z = vitesse_z + (accel_z * dt)
-        c["pos"][0] = c["pos"][0] + (new_vitesse_x * dt)
-        c["pos"][1] = c["pos"][1] + (new_vitesse_y * dt)
-        c["pos"][2] = c["pos"][2] + (new_vitesse_z * dt)
-        c["vel"][0] = new_vitesse_x
-        c["vel"][1] = new_vitesse_y
-        c["vel"][2] = new_vitesse_z
+        c["pos"][0] = c["pos"][0] + (vitesse_x * dt)
+        c["pos"][1] = c["pos"][1] + (vitesse_y * dt)
+        c["pos"][2] = c["pos"][2] + (vitesse_z * dt)
+        c["vel"][0] = vitesse_x + (accel_x * dt)
+        c["vel"][1] = vitesse_y + (accel_y * dt)
+        c["vel"][2] = vitesse_z + (accel_z * dt)
 
-def rock_end(bodies, rock):
+def euler_rock(rock, bodies):
+    fx, fy, fz = CalculForAll(rock, bodies)
+    ax = fx / rock["mass"]
+    ay = fy / rock["mass"]
+    az = fz / rock["mass"]
+    return ax, ay, az
+
+def euler_rock_apply(rock, accel, dt):
+    ax, ay, az = accel
+    rock["pos"][0] += rock["vel"][0] * dt
+    rock["pos"][1] += rock["vel"][1] * dt
+    rock["pos"][2] += rock["vel"][2] * dt
+    rock["vel"][0] += ax * dt
+    rock["vel"][1] += ay * dt
+    rock["vel"][2] += az * dt
+
+def rock_end(rock, bodies):
     for b in bodies:
-        diff = rock["pos"] - b["pos"]
-        distance = sqrt(diff[0]**2 + diff[1]**2 + diff[2]**2)
+        diffx = rock["pos"][0] - b["pos"][0]
+        diffy = rock["pos"][1] - b["pos"][1]
+        diffz = rock["pos"][2] - b["pos"][2]
+        distance = sqrt(diffx**2 + diffy**2 + diffz**2)
         if distance <= b["radius"]:
             return b
     return None
 
 def body_fusion(bodies):
-    return None
+    cluster = []
+
+    for i in range(len(bodies)):
+        for j in range(i + 1, len(bodies)):
+            diffx = bodies[i]["pos"][0] - bodies[j]["pos"][0]
+            diffy = bodies[i]["pos"][1] - bodies[j]["pos"][1]
+            diffz = bodies[i]["pos"][2] - bodies[j]["pos"][2]
+            distance = sqrt(diffx**2 + diffy**2 + diffz**2)
+            if distance <= bodies[i]["radius"] + bodies[j]["radius"]:
+                in_the_cluster = 0
+                for k in cluster:
+                    if i in k or j in k:
+                        if i in k:
+                            k.add(j)
+                        elif j in k:
+                            k.add(i)
+                        in_the_cluster = 1
+                        break
+                if in_the_cluster == 0:
+                    cluster.append({i, j})
+    if len(cluster) == 0:
+        return bodies
+    return internal_body_fusion(bodies, cluster)
 
 
+def is_in_cluster(i, clusters):
+    for c in clusters:
+        if i in c:
+            return True
+    return False
 
+
+def internal_body_fusion(bodies, clusters):
+    new_bodies = []
+
+    for c in clusters:
+        mass_total = 0
+        radius_total = 0
+        vitesse_total = 0
+        nom_total = []
+        nvx, nvy, nvz = 0, 0, 0
+        npx, npy, npz = 0, 0, 0
+        cluster = [bodies[idx] for idx in c]
+        for b in cluster:
+            mass_total += b["mass"]
+        for b in cluster:
+            radius_total += b["radius"] ** 3
+        new_radius = radius_total ** (1/3)
+        for b in cluster:
+            nvx += b["mass"] * b["vel"][0]
+            nvy += b["mass"] * b["vel"][1]
+            nvz += b["mass"] * b["vel"][2]
+        nvx /= mass_total
+        nvy /= mass_total
+        nvz /= mass_total
+        for b in cluster:
+            vitesse = sqrt(b["vel"][0]**2 + b["vel"][1]**2 + b["vel"][2]**2)
+            npx += vitesse * b["pos"][0]
+            npy += vitesse * b["pos"][1]
+            npz += vitesse * b["pos"][2]
+            vitesse_total += vitesse
+        npx /= vitesse_total
+        npy /= vitesse_total
+        npz /= vitesse_total
+        for b in cluster:
+            nom_total.append(b["name"])
+        new_name = "-".join(sorted(nom_total))
+        new_body = {
+            "name": new_name,
+            "mass": mass_total,
+            "radius": new_radius,
+            "pos": [npx, npy, npz],
+            "vel": [nvx, nvy, nvz]
+        }
+        new_bodies.append(new_body)
+
+    for i in range(len(bodies)):
+        if not is_in_cluster(i, clusters):
+            new_bodies.append(bodies[i])
+    return new_bodies
+
+def global_main_core(rock, bodies, dt):
+    i = 0
+    print("Rock coordinates (x y z) are:")
+    while (i < 1000):
+        px = format(round(rock["pos"][0]), ",")
+        py = format(round(rock["pos"][1]), ",")
+        pz = format(round(rock["pos"][2]), ",")
+        print("t = %i: (%s %s %s)" % (i, px, py, pz))
+        is_end = rock_end(rock, bodies)
+        if (is_end != None):
+            print("Collision between rock and %s" % is_end["name"])
+            print("Mission success")
+            return is_end
+        accel = euler_rock(rock, bodies)
+        euler_calcul(bodies, dt)
+        euler_rock_apply(rock, accel, dt)
+        bodies = body_fusion(bodies)
+        i += 1
+    print("Mission failure")
+    return 0
 
 
 if __name__ == "__main__":

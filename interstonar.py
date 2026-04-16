@@ -3,6 +3,7 @@ import sys
 import numpy as np
 
 from parser import load_global, load_local
+from global_mode import global_main_core, rock_mass
 
 def main():
     parser = argparse.ArgumentParser(description="Rock simulator")
@@ -33,11 +34,13 @@ def main():
             print("error : you have to put the --delta arg with this mod", file=sys.stderr)
             sys.exit(1)
         bodies = load_global(args.config_file)
-        print("Mode: global")
-        print("Delta:", args.delta)
-        print("Rock pos:", pos)
-        print("Rock vel:", vel)
-        print("Bodies loaded:", len(bodies))
+        rock = {
+            "name": "rock",
+            "mass": rock_mass,
+            "pos": list(pos),
+            "vel": list(vel)
+        }
+        global_main_core(rock, bodies, args.delta)
     else:
         shapes = load_local(args.config_file)
         print("Mode: local")
