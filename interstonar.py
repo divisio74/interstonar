@@ -1,9 +1,11 @@
+#!/usr/bin/env python3
 import argparse
 import sys
 import numpy as np
 
 from parser import load_global, load_local
 from global_mode import global_main_core, rock_mass
+from local_mode import run_local
 
 def main():
     parser = argparse.ArgumentParser(description="Rock simulator")
@@ -51,6 +53,7 @@ def main():
     else:
         try:
             shapes = load_local(args.config_file)
+            run_local(shapes, pos, vel)
         except FileNotFoundError:
             print("error : file not found", file=sys.stderr)
             sys.exit(84)
