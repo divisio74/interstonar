@@ -1,9 +1,7 @@
 import tomllib
-import numpy as np
-
 
 def to_vec(d):
-    return np.array([d["x"], d["y"], d["z"]], dtype=float)
+    return [float(d["x"]), float(d["y"]), float(d["z"]) ]
 
 
 def read_toml(path):

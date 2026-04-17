@@ -1,6 +1,4 @@
-import os
 from math import sqrt
-import numpy as np
 
 G = 6.674e-11
 rock_mass = 1000
@@ -188,10 +186,10 @@ if __name__ == "__main__":
     from parser import load_global
     bodies = load_global("global_scene_example.toml")
 
-    rock1 = {"pos": bodies[0]["pos"].copy()}
+    rock1 = {"pos": list(bodies[0]["pos"])}
     print("Test 1:", rock_end(bodies, rock1))
 
-    rock2 = {"pos": np.array([1e20, 1e20, 1e20])}
+    rock2 = {"pos": [1e20, 1e20, 1e20]}
     print("Test 2:", rock_end(bodies, rock2))
 
 

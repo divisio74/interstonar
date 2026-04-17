@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import argparse
 import sys
-import numpy as np
 
 from parser import load_global, load_local
 from global_mode import global_main_core, rock_mass
@@ -28,8 +27,8 @@ def main():
         print("error : you have to choose a mod", file=sys.stderr)
         sys.exit(84)
 
-    pos = np.array([args.Px, args.Py, args.Pz], dtype=float)
-    vel = np.array([args.Vx, args.Vy, args.Vz], dtype=float)
+    pos = [args.Px, args.Py, args.Pz]
+    vel = [args.Vx, args.Vy, args.Vz]
 
     if args.is_global:
         if args.delta is None:
@@ -60,10 +59,6 @@ def main():
         except Exception:
             print("error : invalid config file", file=sys.stderr)
             sys.exit(84)
-        print("Mode: local")
-        print("Rock pos:", pos)
-        print("Rock vel:", vel)
-        print("Shapes loaded:", len(shapes))
     sys.exit(0)
 
 if __name__ == "__main__":
