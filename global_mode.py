@@ -171,14 +171,14 @@ def global_main_core(rock, bodies, dt):
         is_end = rock_end(rock, bodies)
         if (is_end != None):
             print("Collision between rock and %s" % is_end["name"])
-            print("Mission success")
+            print("\nMission success")
             return is_end
         accel = euler_rock(rock, bodies)
         euler_calcul(bodies, dt)
         euler_rock_apply(rock, accel, dt)
         bodies = body_fusion(bodies)
         i += 1
-    print("Mission failure")
+    print("\nMission failure")
     return 0
 
 
