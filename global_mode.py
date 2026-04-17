@@ -183,14 +183,17 @@ def global_main_core(rock, bodies, dt):
 
 
 if __name__ == "__main__":
-    from parser import load_global
-    bodies = load_global("global_scene_example.toml")
+    bodies = [
+        {"name": "Charlie", "mass": 1e20, "radius": 100,
+         "pos": [0, 0, 0], "vel": [1, 0, 0]},
+        {"name": "Alpha",   "mass": 1e20, "radius": 100,
+         "pos": [50, 0, 0], "vel": [1, 0, 0]},
+        {"name": "Bravo",   "mass": 1e20, "radius": 100,
+         "pos": [0, 50, 0], "vel": [1, 0, 0]},
+    ]
+    fusion = body_fusion(bodies)
+    print("Nom fusioné :", [b["name"] for b in fusion])
 
-    rock1 = {"pos": list(bodies[0]["pos"])}
-    print("Test 1:", rock_end(bodies, rock1))
-
-    rock2 = {"pos": [1e20, 1e20, 1e20]}
-    print("Test 2:", rock_end(bodies, rock2))
 
 
 
