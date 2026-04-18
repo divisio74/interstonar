@@ -126,21 +126,21 @@ def run_local(shapes, pos, vel):
     step = 1
     while step <= 1000:
         dist, nearest = find_closest(px, py, pz, shapes)
-        if dist <= 0.1:
-            print()
-            print(f"Result: Intersection with {nearest['name']}")
-            return
 
         px = px +dx * dist
         py = py + dy * dist
         pz = pz + dz * dist
         print(f"Step {step}: ({px:.2f}, {py:.2f}, {pz:.2f})")
+    
+        if dist <= 0.1:
+            print()
+            print(f"Result: Intersection with {nearest['name']}")
+            return
 
         if dist > 1000.0:
             print()
             print("Result: Out of scene")
             return
-
 
         step += 1
     print()
