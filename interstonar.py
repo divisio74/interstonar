@@ -18,7 +18,10 @@ def main():
     parser.add_argument("Vx", type=float)
     parser.add_argument("Vy", type=float)
     parser.add_argument("Vz", type=float)
-    args = parser.parse_args()
+    try:
+        args = parser.parse_args()
+    except SystemExit:
+        sys.exit(84)
 
     if args.is_global and args.is_local:
         print("error : you cannot put the two mod at the same time", file=sys.stderr)
@@ -50,8 +53,15 @@ def main():
         }
         global_main_core(rock, bodies, args.delta)
     else:
+        try:
             shapes = load_local(args.config_file)
             run_local(shapes, pos, vel)
+        except FileNotFoundError:
+            print("error: file not found", file=sys.stderr)
+            sys.exit(84)
+        except Exception:
+            print("error: invalid config file", file=sys.stderr)
+            sys.exit(84)
     sys.exit(0)
 
 if __name__ == "__main__":
